@@ -55,7 +55,9 @@ public class JSONTokenizer {
       _type = JSONTokenType.COMMENT;
     } else {
       _type = JSONTokenType.UNKNOWN;
-      consumeChar();
+      if (!atEndOfInput()) {
+        consumeChar();
+      }
     }
     _currentEndOffset = _offset;
     _currentStringValue = _contents.substring(_currentStartOffset, _currentEndOffset);
@@ -105,26 +107,39 @@ public class JSONTokenizer {
   }
 
   private boolean consumeNumber() {
-    if (Character.isDigit(currentChar())) {
-      consumeDigit();
+    if (Character.isDigit(currentChar()) || currentChar() == '-') {
+      if(currentChar() == '-') {
+        consumeChar();
+      }
       if (!atEndOfInput()) {
-        if (currentChar() == '.') {
+        if(currentChar() == '0') {
+          consumeChar();
+        } else if (Character.isDigit(currentChar())) {
+          consumeDigit();
+        } else {
+          return false;
+        }
+        if (!atEndOfInput() && currentChar() == '.') {
           if (canPeek(1) && Character.isDigit(peek())) {
             incrementOffset();
             consumeDigit();
-          }
-        } else if (currentChar() == 'e' || currentChar() == 'E') {
-          if (canPeek(1) && Character.isDigit(peek())) {
-            incrementOffset();
-            consumeDigit();
-          } else if (canPeek(2) && (peek() == '-' || peek() == '+') && Character.isDigit(peek(2))) {
-            incrementOffset();
-            incrementOffset();
-            consumeDigit();
+          } else {
+            return false;
           }
         }
+        if (!atEndOfInput() && (currentChar() == 'e' || currentChar() == 'E')) {
+          if (canPeek(1) && (peek() == '-' || peek() == '+')) {
+            consumeChar();
+          }
+          if (canPeek(1) && Character.isDigit(peek())) {
+            incrementOffset();
+            consumeDigit();
+          } else {
+            return false;
+          }
+        }
+        return true;
       }
-      return true;
     }
     return false;
   }

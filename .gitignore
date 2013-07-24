@@ -5,3 +5,7 @@ src/.DS_Store
 lib
 target
 goson.i??
+.idea
+*.iml
+target
+

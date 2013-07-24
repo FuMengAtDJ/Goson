@@ -24,8 +24,8 @@ public class JSchemaRPCTypeInfo extends JSchemaRPCTypeInfoBase
   }
 
   @Override
-  protected List<IMethodInfo> buildMethods() {
-    List<IMethodInfo> methods = super.buildMethods();
+  protected MethodList buildMethods() {
+    MethodList methods = super.buildMethods();
     methods.add(new MethodInfoBuilder()
       .withName("with")
       .withStatic()

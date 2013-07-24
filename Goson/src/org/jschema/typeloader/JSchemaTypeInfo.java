@@ -29,27 +29,27 @@ public class JSchemaTypeInfo extends TypeInfoBase {
   private Map<String, String> propertyNameToJsonSlot = new HashMap<String, String>();
   private List<IPropertyInfo> properties;
 
-  private LockingLazyVar<List<IMethodInfo>> methods = new LockingLazyVar<List<IMethodInfo>>() {
+  private LockingLazyVar<MethodList> methods = new LockingLazyVar<MethodList>() {
     @Override
-    protected List<IMethodInfo> init() {
+    protected MethodList init() {
       return buildMethods();
     }
   };
   private IMethodInfo _convertToMethod;
   private IMethodInfo _findMethod;
 
-  private List<IMethodInfo> buildMethods() {
+  private MethodList buildMethods() {
     if (isJsonEnum()) {
-      return (List) TypeSystem.get(JSchemaEnumType.JsonEnumValue.class).getTypeInfo().getMethods();
+      return TypeSystem.get(JSchemaEnumType.JsonEnumValue.class).getTypeInfo().getMethods();
     } else if (isListWrapper()) {
-      List<IMethodInfo> typeMethods = new ArrayList<IMethodInfo>();
+      MethodList typeMethods = new MethodList();
 
       addStaticProductionMethods(typeMethods, ((JSchemaListWrapperType) getOwnersType()).getWrappedType(), this);
 
       return typeMethods;
     } else {
 
-      List<IMethodInfo> typeMethods = new ArrayList<IMethodInfo>();
+      MethodList typeMethods = new MethodList();
 
       addStaticProductionMethods(typeMethods, getOwnersType(), this);
 
@@ -457,7 +457,7 @@ public class JSchemaTypeInfo extends TypeInfoBase {
   }
 
 	@Override
-	public List<? extends IMethodInfo> getMethods() {
+	public MethodList getMethods() {
 		return methods.get();
 	}
 
@@ -476,15 +476,15 @@ public class JSchemaTypeInfo extends TypeInfoBase {
 		return null;
 	}
 
-	@Override
-	public CharSequence getRealPropertyName(CharSequence propName) {
-		for (IPropertyInfo prop : properties) {
-			if (propName.equals(prop.getName())) {
-				return prop.getName();
-			}
-		}
-		return null;
-	}
+//	@Override
+//	public CharSequence getRealPropertyName(CharSequence propName) {
+//		for (IPropertyInfo prop : properties) {
+//			if (propName.equals(prop.getName())) {
+//				return prop.getName();
+//			}
+//		}
+//		return null;
+//	}
 
   @Override
   public IMethodInfo getMethod(CharSequence methodName, IType... params) {

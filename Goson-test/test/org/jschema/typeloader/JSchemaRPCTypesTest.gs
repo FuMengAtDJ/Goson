@@ -134,7 +134,7 @@ class JSchemaRPCTypesTest extends GosonTest {
    using( server ) {
      var emp = Sample1
                    .with( :handler = new ApacheHTTPClientCallHandler(),
-                          :method = Post )
+                          :method = POST )
                    .getEmployee(22)
 
      assertEquals( "Joe", emp.FirstName )

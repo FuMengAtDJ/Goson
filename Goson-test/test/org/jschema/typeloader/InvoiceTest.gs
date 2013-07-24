@@ -56,27 +56,27 @@ class InvoiceTest extends GosonTest {
     invoice.find(org.jschema.examples.Invoice.Address)
            .each( \ addr -> print( "Address Parent : ${addr.parent()}" ) )
 
-    var map = invoice.asJSON()
+    var map = invoice.asJson()
     print( "Raw ID: ${map.get("id")}" )
     map.put( "foo", "bar" )
   }
 
-  function testTwitterWhichHasNothingToDoWithInvoiceSoShutUp() {
-    var latestTweets = TwitterUserTimeline.get("http://api.twitter.com/1/statuses/user_timeline.json",
-                                              { "include_entities" -> true,
-                                                 "include_rts" -> true,
-                                                 "screen_name" -> "carson_gross",
-                                                 "count"-> 5 } )
-    for( tweet in latestTweets ) {
-      print( tweet.Text )
-    }
-  }
-
-  function testGithubWhichHasNothingToDoWithInvoiceSoShutUp() {
-    var latestCommits = GithubCreate.get("http://github.com/api/v2/json/commits/list/mojombo/grit/master").Commits
-    for( c in latestCommits ) {
-      assertEquals( Date, statictypeof c.CommittedDate )
-    }
-  }
+//  function testTwitterWhichHasNothingToDoWithInvoiceSoShutUp() {
+//    var latestTweets = TwitterUserTimeline.get("http://api.twitter.com/1/statuses/user_timeline.json",
+//                                              { "include_entities" -> true,
+//                                                 "include_rts" -> true,
+//                                                 "screen_name" -> "carson_gross",
+//                                                 "count"-> 5 } )
+//    for( tweet in latestTweets ) {
+//      print( tweet.Text )
+//    }
+//  }
+//
+//  function testGithubWhichHasNothingToDoWithInvoiceSoShutUp() {
+//    var latestCommits = GithubCreate.get("http://github.com/api/v2/json/commits/list/mojombo/grit/master").Commits
+//    for( c in latestCommits ) {
+//      assertEquals( Date, statictypeof c.CommittedDate )
+//    }
+//  }
 
 }

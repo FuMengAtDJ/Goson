@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
 
 public abstract class JSchemaRPCTypeInfoBase extends TypeInfoBase {
   private JSchemaRPCTypeBase _owner;
-  private List<? extends IMethodInfo> _methods;
+  private MethodList _methods;
   private List<? extends IPropertyInfo> _properties;
   private Map<String, IPropertyInfo> _propertiesMap;
   private List<? extends IMethodInfo> _jsonDeclaredMethods;
@@ -51,14 +51,14 @@ public abstract class JSchemaRPCTypeInfoBase extends TypeInfoBase {
     return props;
   }
 
-  protected List<IMethodInfo> buildMethods() {
-    ArrayList<IMethodInfo> methods = new ArrayList<IMethodInfo>();
+  protected MethodList buildMethods() {
+    MethodList methods = new MethodList();
     buildFunctionMethods(methods);
     _jsonDeclaredMethods = new ArrayList<IMethodInfo>(methods);
     return methods;
   }
 
-  private void buildFunctionMethods(ArrayList<IMethodInfo> methods) {
+  private void buildFunctionMethods(MethodList methods) {
     for (Map function : _owner.getFunctions()) {
 
       final String name = (String) function.get("name");
@@ -141,13 +141,13 @@ public abstract class JSchemaRPCTypeInfoBase extends TypeInfoBase {
     return _propertiesMap.get(propName.toString());
   }
 
-  @Override
-  public CharSequence getRealPropertyName(CharSequence propName) {
-    return propName;
-  }
+//  @Override
+//  public CharSequence getRealPropertyName(CharSequence propName) {
+//    return propName;
+//  }
 
   @Override
-  public List<? extends IMethodInfo> getMethods() {
+  public MethodList getMethods() {
     return _methods;
   }
 

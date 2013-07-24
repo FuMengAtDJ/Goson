@@ -34,6 +34,8 @@ public class JSONParserTest extends GosonTest {
     assertEquals(bd("1E+1"), JSchemaUtils.parseJson("1E+1"));
     assertEquals(bd("1e-1"), JSchemaUtils.parseJson("1e-1"));
     assertEquals(bd("1E-1"), JSchemaUtils.parseJson("1E-1"));
+    assertEquals(bd("1.0E-1"), JSchemaUtils.parseJson("1.0E-1"));
+    assertEquals(bd("-1.0E+1"), JSchemaUtils.parseJson("-1.0E+1"));
 
     // booleans
     assertEquals(Boolean.TRUE, JSchemaUtils.parseJson("true"));
@@ -50,6 +52,41 @@ public class JSONParserTest extends GosonTest {
     map.put("foo", 10L);
     map.put("bar", false);
     assertEquals(map, JSchemaUtils.parseJson("{\"foo\" : 10, \"bar\" : false}"));
+  }
+
+  public void testWrongNumbers() {
+    String msg;
+    try {
+      msg = null;
+      JSchemaUtils.parseJson("[09]");
+    } catch (JsonParseException ex) {
+      msg = ex.getMessage();
+    }
+    assertTrue(msg != null && msg.contains("Unexpected token '9'"));
+
+    try {
+      msg = null;
+      JSchemaUtils.parseJson("-");
+    } catch (JsonParseException ex) {
+      msg = ex.getMessage();
+    }
+    assertTrue(msg != null && msg.contains("Unexpected token '-'"));
+
+    try {
+      msg = null;
+      JSchemaUtils.parseJson("1.0e");
+    } catch (JsonParseException ex) {
+      msg = ex.getMessage();
+    }
+    assertTrue(msg != null && msg.contains("Unexpected token '1.0e'"));
+
+    try {
+      msg = null;
+      JSchemaUtils.parseJson("1.0e-");
+    } catch (JsonParseException ex) {
+      msg = ex.getMessage();
+    }
+    assertTrue(msg != null && msg.contains("Unexpected token '1.0e-'"));
   }
 
   private Object bd(String s) {

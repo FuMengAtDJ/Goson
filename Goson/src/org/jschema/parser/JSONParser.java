@@ -182,28 +182,14 @@ public class JSONParser {
   }
 
   private Number parseNumber() {
-    boolean leadingNegative = false;
-    if (match("-")) {
-      leadingNegative = true;
-    }
     if (_currentToken.isNumber()) {
       String value = _currentToken.getValue();
       consumeToken();
       if (value.contains(".") || value.contains("e") || value.contains("E") || JavaTypes.BIG_DECIMAL().equals(_currentType)) {
-        if (leadingNegative) {
-          return new BigDecimal("-" + value);
-        } else {
-          return new BigDecimal(value);
-        }
+        return new BigDecimal(value);
       } else {
-        if (leadingNegative) {
-          return Long.parseLong("-" + value);
-        } else {
-          return Long.parseLong(value);
-        }
+        return Long.parseLong(value);
       }
-    } else if (leadingNegative) {
-      badToken();
     }
     return null;
   }

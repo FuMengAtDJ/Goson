@@ -51,12 +51,12 @@ public class GosonSuite extends TestSuite {
   }
 
   public static void maybeInitGosu() {
-    if (!GosuInitialization.isInitialized()) {
+    if (!GosuInitialization.instance(TypeSystem.getExecutionEnvironment()).isInitialized()) {
       Gosu.init();
 
       // check to see if there is a JSchemaTypeLoader around, and create one if not
       if (TypeSystem.getTypeLoader(JSchemaTypeLoader.class) == null) {
-        TypeSystem.pushTypeLoader(new JSchemaTypeLoader(TypeSystem.getCurrentModule()));
+        TypeSystem.pushTypeLoader(null, new JSchemaTypeLoader(TypeSystem.getCurrentModule()));
       }
 
       TypeSystem.refresh(true);

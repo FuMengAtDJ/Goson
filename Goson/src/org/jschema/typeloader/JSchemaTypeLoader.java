@@ -1,7 +1,9 @@
 package org.jschema.typeloader;
 
+import gw.fs.IDirectory;
 import gw.fs.IFile;
 import gw.lang.reflect.IType;
+import gw.lang.reflect.RefreshKind;
 import gw.lang.reflect.TypeLoaderBase;
 import gw.lang.reflect.TypeSystem;
 import gw.lang.reflect.module.IModule;
@@ -16,18 +18,24 @@ import org.jschema.typeloader.rpc.JSchemaCustomizedRPCType;
 import org.jschema.typeloader.rpc.JSchemaRPCType;
 import org.jschema.util.JSchemaUtils;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 public class JSchemaTypeLoader extends TypeLoaderBase {
 
   private Map<String, IJSchemaType> _rawTypes = new HashMap<String, IJSchemaType>();
+  private Set<String> _namespaces = new HashSet<String>();
   private Map<IFile, List<String>> _filesToTypes = new HashMap<IFile, List<String>>();
 
   private static final String JSC_RPC_EXT = "jsc-rpc";
   private static final String JSC_EXT = "jsc";
   private static final String JSON_EXT = "json";
-  private boolean _initing;
+  private volatile boolean _initing;
 
   public JSchemaTypeLoader(IModule env) {
     super(env);
@@ -43,82 +51,121 @@ public class JSchemaTypeLoader extends TypeLoaderBase {
     return TypeSystem.getOrCreateTypeReference(iType);
   }
 
+  @Override
+  public Set<? extends CharSequence> getAllNamespaces() {
+    maybeInitTypes();
+    return Collections.unmodifiableSet( _namespaces );
+  }
+
   //TODO cgross - this should be lazy
   private void maybeInitTypes() {
     if (!_initing) {
       if (_rawTypes.isEmpty()) {
-        _initing = true;
+        TypeSystem.lock();
         try {
-          for (JsonFile jshFile : _jscFiles.get()) {
-            try {
-              jshFile.parseContent();
-              addRootType(_rawTypes, new Stack<Map<String, String>>(), jshFile, jshFile.file, _filesToTypes);
-            } catch (Exception e) {
-              throw GosuExceptionUtil.forceThrow(e);
+          if (!_initing) {
+            if (_rawTypes.isEmpty()) {
+              _initing = true;
+              try {
+                for (JsonFile jshFile : _jscFiles.get()) {
+                  try {
+                    jshFile.parseContent();
+                    addRootType(_rawTypes, new Stack<Map<String, String>>(), jshFile, jshFile.file, _filesToTypes);
+                  } catch (Exception e) {
+                    throw GosuExceptionUtil.forceThrow(e);
+                  }
+                }
+                for (JsonFile jshRpcFile : _jscRpcFiles.get()) {
+                  try {
+                    jshRpcFile.parseContent();
+                    addRpcTypes(_rawTypes, jshRpcFile, jshRpcFile.file, _filesToTypes);
+                  } catch (Exception e) {
+                    throw GosuExceptionUtil.forceThrow(e);
+                  }
+                }
+                for (JsonFile jsonFile : _jsonFiles.get()) {
+                  try {
+                    jsonFile.parseContent();
+                    convertToJSchemaAndAddRootType(_rawTypes, jsonFile, jsonFile.file, _filesToTypes);
+                  } catch (Exception e) {
+                    throw GosuExceptionUtil.forceThrow(e);
+                  }
+                }
+                initInnerClasses(_rawTypes);
+              } finally {
+                _initing = false;
+              }
             }
           }
-          for (JsonFile jshRpcFile : _jscRpcFiles.get()) {
-            try {
-              jshRpcFile.parseContent();
-              addRpcTypes(_rawTypes, jshRpcFile, jshRpcFile.file, _filesToTypes);
-            } catch (Exception e) {
-              throw GosuExceptionUtil.forceThrow(e);
-            }
-          }
-          for (JsonFile jsonFile : _jsonFiles.get()) {
-            try {
-              jsonFile.parseContent();
-              convertToJSchemaAndAddRootType(_rawTypes, jsonFile, jsonFile.file, _filesToTypes);
-            } catch (Exception e) {
-              throw GosuExceptionUtil.forceThrow(e);
-            }
-          }
-          initInnerClasses(_rawTypes);
-        } finally {
-          _initing = false;
+        }
+        finally {
+          TypeSystem.unlock();
         }
       }
     }
   }
 
   @Override
-  public List<IType> refreshedFile(IFile file) {
-    List<String> typeNames = getTypeNamesForFile(file);
-    if (file.getExtension().equals(JSC_EXT) ||
-        file.getExtension().equals(JSC_RPC_EXT) ||
-        file.getExtension().equals(JSON_EXT)) {
+  public RefreshKind refreshedFile(IFile file, String[] types, RefreshKind kind) {
+//    List<String> typeNames = getTypeNamesForFile(file);
+    if (file.getExtension().toLowerCase().equals(JSC_EXT) ||
+        file.getExtension().toLowerCase().equals(JSC_RPC_EXT) ||
+        file.getExtension().toLowerCase().equals(JSON_EXT)) {
       _rawTypes.clear();
+      _namespaces.clear();
       _filesToTypes.clear();
-      if (file.getExtension().equals(JSC_EXT)) {
+      if (file.getExtension().toLowerCase().equals(JSC_EXT)) {
         _jscFiles.clear();
       }
-      if (file.getExtension().equals(JSC_RPC_EXT)) {
+      if (file.getExtension().toLowerCase().equals(JSC_RPC_EXT)) {
         _jscRpcFiles.clear();
       }
-      if (file.getExtension().equals(JSON_EXT)) {
+      if (file.getExtension().toLowerCase().equals(JSON_EXT)) {
         _jsonFiles.clear();
       }
     }
-    ArrayList<IType> types = new ArrayList<IType>();
-    for (String typeName : typeNames) {
-      IType type = TypeSystem.getByFullNameIfValid(typeName);
-      if (type != null) {
-        types.add(type);
-      }
-    }
-    return types;
+    return kind;
   }
 
-  public List<IType> getTypesForFile(IFile file) {
-    ArrayList<IType> types = new ArrayList<IType>();
+  public String[] getTypesForFile(IFile file) {
+    ArrayList<String> types = new ArrayList<String>();
     List<String> typeNamesForFile = getTypeNamesForFile(file);
     for (String s : typeNamesForFile) {
       IType type = TypeSystem.getByFullNameIfValid(s);
       if (type != null) {
-        types.add(type);
+        types.add(type.getName());
       }
     }
-    return types;
+    return types.toArray(new String[types.size()]);
+  }
+
+  @Override
+  public void refreshedNamespace(String namespace, IDirectory iDirectory, RefreshKind kind) {
+    if (_namespaces != null) {
+      if (kind == RefreshKind.CREATION) {
+        _namespaces.add(namespace);
+      } else if (kind == RefreshKind.DELETION) {
+        //## todo: remove types/resources corresponding with the namespace.  For now just clearing everything.
+        _rawTypes.clear();
+        _namespaces.clear();
+        _filesToTypes.clear();
+        _jscFiles.clear();
+        _jscRpcFiles.clear();
+        _jsonFiles.clear();
+      }
+    }
+  }
+
+  @Override
+  public boolean hasNamespace(String s) {
+    maybeInitTypes();
+    return _namespaces.contains( s );
+  }
+
+  @Override
+  public Set<String> computeTypeNames() {
+    maybeInitTypes();
+    return new HashSet<String>( _rawTypes.keySet() );
   }
 
   private List<String> getTypeNamesForFile(IFile file) {
@@ -201,6 +248,10 @@ public class JSchemaTypeLoader extends TypeLoaderBase {
 
   private void putType(Map<String, IJSchemaType> rawTypes, String name, IJSchemaType type, IFile file, Map<IFile, List<String>> fileMapping) {
     rawTypes.put(name, type);
+    int iDot = name.indexOf( '.' );
+    if( iDot >= 0 ) {
+      _namespaces.add( name.substring(0, iDot) );
+    }
     List<String> iTypes = fileMapping.get(file);
     if (iTypes == null) {
       iTypes = new ArrayList<String>();
@@ -301,12 +352,6 @@ public class JSchemaTypeLoader extends TypeLoaderBase {
       JSchemaCustomizedRPCType rpcType2 = new JSchemaCustomizedRPCType(customizedTypeName, this, jshRpcFile.content, typeDefs.peek(), defaultValues, jshRpcFile.stringContent);
       putType(types, rpcType2.getName(), rpcType2, file, fileMapping);
     }
-  }
-
-  @Override
-  public Set<String> getAllTypeNames() {
-    maybeInitTypes();
-    return new HashSet<String>( _rawTypes.keySet() );
   }
 
   @Override
