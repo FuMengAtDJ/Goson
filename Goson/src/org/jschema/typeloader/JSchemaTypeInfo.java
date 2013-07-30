@@ -488,6 +488,7 @@ public class JSchemaTypeInfo extends TypeInfoBase {
 
   @Override
   public IMethodInfo getMethod(CharSequence methodName, IType... params) {
+    getMethods();
     //Not sure why I need to do this, seems like the generics system should work this out
     if ("convertTo".equals(methodName) && params.length == 1 && params[0] instanceof IMetaType) {
       return _convertToMethod;
