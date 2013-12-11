@@ -11,7 +11,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
-@Ignore
+//@Ignore
 public class JSONParserTest extends GosonTest {
 
   public void testBasics() {

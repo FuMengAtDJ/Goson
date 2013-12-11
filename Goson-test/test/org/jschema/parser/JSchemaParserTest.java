@@ -7,7 +7,7 @@ import org.junit.Ignore;
 
 import java.util.Map;
 
-@Ignore
+//@Ignore
 public class JSchemaParserTest extends GosonTest {
 
   public void testTypedefsMustBeFollowedByObject()

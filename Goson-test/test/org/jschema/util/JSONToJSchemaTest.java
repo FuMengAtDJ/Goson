@@ -9,7 +9,7 @@ import org.junit.Ignore;
 
 import java.io.*;
 
-@Ignore
+//@Ignore
 public class JSONToJSchemaTest extends GosonTest {
   private static final String JSON_FILE = "test/org/jschema/examples/json/GithubCreate.json";
   private static final String JSC_OUTPUT = "result.jsc";

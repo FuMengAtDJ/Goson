@@ -31,7 +31,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-@Ignore
+//@Ignore
 public class JSchemaTypeLoaderTest extends GosonTest {
 
   public void testBasicGosonTypes() {
