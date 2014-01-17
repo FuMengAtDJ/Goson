@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>goson-proj</artifactId>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
   <packaging>pom</packaging>
 
   <name>Goson :: Project Aggregator</name>
@@ -44,7 +44,7 @@
     <connection>scm:git:git@github.com:gosu-lang/Goson.git</connection>
     <url>scm:git:git@github.com:gosu-lang/Goson.git</url>
     <developerConnection>scm:git:git@github.com:gosu-lang/Goson.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>goson-0.3</tag>
   </scm>
 
   <repositories>
