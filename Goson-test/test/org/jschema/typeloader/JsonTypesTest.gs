@@ -69,7 +69,7 @@ class JsonTypesTest extends GosonTest {
       :StringEx = "Oh word",
       :BooleanEx = true
     }
-    /*
+
       {
   "some_type": {
     "big_int_ex": 12312312,

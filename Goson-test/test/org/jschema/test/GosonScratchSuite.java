@@ -11,12 +11,12 @@ public class GosonScratchSuite extends TestSuite {
 
   private static String[] getTests() {
     return new String[]{
-//      "org.jschema.typeloader.JsonTypesTest",
+      "org.jschema.typeloader.JsonTypesTest",
       "org.jschema.typeloader.JSchemaTypesTest",
-//      "org.jschema.typeloader.InvoiceTest",
-//      "org.jschema.util.JSchemaUtilsTest",
-//      "org.jschema.typeloader.AssignabilityTest",
-//      "org.jschema.typeloader.JSchemaTypeLoaderTest",
+      "org.jschema.typeloader.InvoiceTest",
+      "org.jschema.util.JSchemaUtilsTest",
+      "org.jschema.typeloader.AssignabilityTest",
+      "org.jschema.typeloader.JSchemaTypeLoaderTest",
     };
   }
 
